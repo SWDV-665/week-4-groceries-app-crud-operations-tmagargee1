@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { NavController} from 'ionic-angular';
 import { ToastController } from 'ionic-angular';
-import { AlertController } from 'ionic-angular';
+import { GroceriesServiceProvider } from '../../providers/groceries-service/groceries-service';
+import { InputDialogServiceProvider } from '../../providers/input-dialog-service/input-dialog-service';
 
 @Component({
   selector: 'page-home',
@@ -10,27 +11,13 @@ import { AlertController } from 'ionic-angular';
 export class HomePage {
   title = "Grocery";
 
-  items = [
-    {
-      name: "Milk",
-      quantity: 2    
-    },
-    {
-      name: "Bread",
-      quantity: 1    
-    },
-    {
-      name: "Banana",
-      quantity: 6    
-    },
-    {
-      name: "Beef",
-      quantity: 3    
-    },
-  ];
+  constructor(public navCtrl: NavController, public toastCtrl: ToastController,
+    public dataService: GroceriesServiceProvider, public inputDialogService: InputDialogServiceProvider) {
 
-  constructor(public navCtrl: NavController, public toastCtrl: ToastController, public alertCtrl: AlertController) {
+  }
 
+  loadItems() {
+    return this.dataService.getItems();
   }
 
   removeItem(item, index) {
@@ -39,36 +26,20 @@ export class HomePage {
       duration: 3000
     });
     toast.present();
-
-    this.items.splice(index, 1);
+    
+    this.dataService.removeItem(index);  
   }
 
-  addItem() {
-    const prompt = this.alertCtrl.create({
-      title: 'Add Item',
-      message: "Please enter item...",
-      inputs: [
-        {
-          name: 'name',
-          placeholder: 'Name'
-        },
-        {
-          name: 'quantity',
-          placeholder: 'Quantity'
-        },
-      ],
-      buttons: [
-        {
-          text: 'Cancel'
-        },
-        {
-          text: 'Save',
-          handler: item => {
-            this.items.push(item);
-          }
-        }
-      ]
+  editItem(item, index) {
+    const toast = this.toastCtrl.create({
+      message: 'Editing Item - ' + index + " ...",
+      duration: 3000
     });
-    prompt.present();
+    toast.present();
+    this.inputDialogService.showPrompt(item, index);
+  }  
+
+  addItem() {
+    this.inputDialogService.showPrompt();
   }
 }
